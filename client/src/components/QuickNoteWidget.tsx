@@ -69,66 +69,100 @@ export function QuickNoteWidget() {
   }
 
   return (
-    <div className="quick-note-widget">
-      <div className="quick-note-header">
-        <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--accent-yellow)' }}>
-          bolt
-        </span>
-        <h3 className="quick-note-title">Catatan Cepat Hari Ini</h3>
-        {notes.length > 0 && (
-          <span className="quick-note-badge">{notes.length}</span>
-        )}
+    <div className="quick-note-widget m3-quick-note">
+      <div className="quick-note-header m3-quick-note-headline-row">
+        <div className="m3-quick-note-headline-icon" aria-hidden="true">
+          <span className="material-symbols-outlined">
+            bolt
+          </span>
+        </div>
+        <div className="m3-quick-note-headline-text">
+          <p className="m3-quick-note-eyebrow">Hari ini · {notes.length} catatan</p>
+          <h3 className="quick-note-title m3-quick-note-title">Catatan Cepat</h3>
+          <p className="m3-quick-note-supporting">Tangkap ide PKL dalam sekali ketuk — AI bantu merangkumnya jadi jurnal.</p>
+        </div>
       </div>
 
-      <div className="quick-note-input-row">
+      <form
+        className="quick-note-input-row m3-quick-note-searchbar"
+        onSubmit={(e) => { e.preventDefault(); handleSave() }}
+      >
+        <span className="material-symbols-outlined m3-quick-note-searchbar-leading" aria-hidden="true">
+          {saving ? 'progress_activity' : 'edit_note'}
+        </span>
         <input
           id="quick-note-input"
           type="text"
           className="quick-note-input"
-          placeholder="Tulis kegiatan singkat, tekan Enter atau klik Simpan..."
+          placeholder="Tulis kegiatan singkat hari ini..."
           value={inputText}
           onChange={e => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={saving}
           autoComplete="off"
         />
+        {inputText.trim() ? (
+          <button
+            type="button"
+            className="btn-icon btn-sm m3-quick-note-clear-btn"
+            title="Bersihkan"
+            onClick={() => setInputText('')}
+            disabled={saving}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
+          </button>
+        ) : null}
         <button
           id="quick-note-save-btn"
-          type="button"
-          className="btn btn-primary btn-sm"
-          onClick={handleSave}
+          type="submit"
+          className="btn btn-primary btn-sm m3-quick-note-send-btn"
           disabled={saving || !inputText.trim()}
-          style={{ flexShrink: 0, gap: 6 }}
+          title="Simpan catatan"
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>add</span>
-          <span>{saving ? 'Menyimpan...' : 'Simpan'}</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{saving ? 'progress_activity' : 'arrow_upward'}</span>
+          <span className="m3-quick-note-send-label">{saving ? 'Menyimpan...' : 'Simpan'}</span>
         </button>
-      </div>
+      </form>
 
       {notes.length > 0 ? (
-        <ul className="quick-note-list">
-          {notes.map(note => (
-            <li key={note.id} className="quick-note-item">
-              <span className="material-symbols-outlined quick-note-item-dot" style={{ fontSize: 14 }}>
-                fiber_manual_record
+        <ul className="quick-note-list m3-quick-note-list">
+          {notes.map((note, idx) => (
+            <li
+              key={note.id}
+              className="quick-note-item m3-quick-note-item"
+              style={{ animationDelay: `${Math.min(idx, 8) * 45}ms` }}
+            >
+              <span className="m3-quick-note-item-avatar" aria-hidden="true">
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                  streak
+                </span>
               </span>
               <span className="quick-note-item-text">{note.teks}</span>
-              <button
-                type="button"
-                className="btn-icon quick-note-delete-btn"
-                title="Hapus catatan ini"
-                onClick={() => handleDelete(note.id)}
-                style={{ flexShrink: 0 }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>close</span>
-              </button>
+              <span className="m3-quick-note-item-trailing">
+                <span className="m3-quick-note-item-count">{String(idx + 1).padStart(2, '0')}</span>
+                <button
+                  type="button"
+                  className="btn-icon quick-note-delete-btn m3-quick-note-delete-btn"
+                  title="Hapus catatan ini"
+                  onClick={() => handleDelete(note.id)}
+                  style={{ flexShrink: 0 }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
+                </button>
+              </span>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="hint quick-note-empty">
-          Belum ada catatan untuk hari ini. Catat kegiatan kecil sekarang, lalu gunakan AI untuk merangkumnya saat membuat jurnal.
-        </p>
+        <div className="hint quick-note-empty m3-quick-note-empty">
+          <div className="m3-quick-note-empty-icon" aria-hidden="true">
+            <span className="material-symbols-outlined">auto_awesome</span>
+          </div>
+          <div>
+            <p className="m3-quick-note-empty-title">Belum ada catatan hari ini</p>
+            <p className="m3-quick-note-empty-sub">Tulis satu kegiatan kecil di atas, tekan Enter — sisanya biar AI yang merangkum.</p>
+          </div>
+        </div>
       )}
     </div>
   )

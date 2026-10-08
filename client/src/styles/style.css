@@ -506,6 +506,16 @@ input[type="file"]::file-selector-button:hover {
   align-items: center;
 }
 
+/* Header Beranda tidak sticky: isinya ada quotes + widget tinggi,
+   kalau sticky akan menutupi Catatan Cepat saat scroll */
+#tab-dashboard .dashboard-header {
+  position: static;
+  top: auto;
+  z-index: auto;
+  margin-top: 0;
+  padding-top: 0;
+}
+
 .page-title {
   margin: 0 0 4px;
   font-size: 20px;
@@ -4811,14 +4821,29 @@ details.widget-dropdown[open] .expand-icon {
   }
 }
 
-/* ============ QUICK NOTE WIDGET ============ */
+/* ============ QUICK NOTE WIDGET — M3 EXPRESSIVE ============ */
 .quick-note-widget {
   background: var(--bg-elevated);
   border-radius: 24px;
   padding: 20px 24px;
   margin-top: 24px;
+  flex-shrink: 0;
+  min-height: 0;
+  overflow: visible;
   animation: slideUpFade 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   animation-delay: 0.3s;
+}
+
+.m3-quick-note {
+  position: relative;
+  z-index: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 28px;
+  padding: 24px;
+  overflow: clip;
+  background:
+    radial-gradient(420px 200px at 12% -20%, var(--primary-badge), transparent 70%),
+    var(--bg-elevated);
 }
 
 .quick-note-header {
@@ -4828,12 +4853,66 @@ details.widget-dropdown[open] .expand-icon {
   margin-bottom: 16px;
 }
 
+.m3-quick-note-headline-row {
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.m3-quick-note-headline-icon {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+
+.m3-quick-note-headline-icon .material-symbols-outlined {
+  font-size: 28px;
+  font-variation-settings: 'FILL' 1;
+}
+
+.m3-quick-note-headline-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.m3-quick-note-eyebrow {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
 .quick-note-title {
   font-size: 16px;
   font-weight: 600;
   margin: 0;
   color: var(--fg-heading);
   flex: 1;
+}
+
+.m3-quick-note-title {
+  flex: none;
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 4px;
+}
+
+.m3-quick-note-supporting {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  max-width: 52ch;
 }
 
 .quick-note-badge {
@@ -4854,6 +4933,31 @@ details.widget-dropdown[open] .expand-icon {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.m3-quick-note-searchbar {
+  gap: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 6px 6px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.m3-quick-note-searchbar:focus-within {
+  border-color: var(--primary);
+  background: var(--input-bg);
+  box-shadow: 0 0 0 3px var(--primary-badge);
+}
+
+.m3-quick-note-searchbar-leading {
+  flex-shrink: 0;
+  font-size: 22px;
+  color: var(--fg-muted);
+}
+
+.m3-quick-note-searchbar:focus-within .m3-quick-note-searchbar-leading {
+  color: var(--primary);
 }
 
 .quick-note-input {
@@ -4878,6 +4982,39 @@ details.widget-dropdown[open] .expand-icon {
   box-shadow: 0 0 0 3px rgba(131, 165, 152, 0.15);
 }
 
+.m3-quick-note-searchbar .quick-note-input {
+  min-width: 0;
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  font-size: 14.5px;
+}
+
+.m3-quick-note-searchbar .quick-note-input:focus {
+  border: none;
+  box-shadow: none;
+}
+
+.m3-quick-note-clear-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--fg-muted);
+}
+
+.m3-quick-note-clear-btn:hover {
+  color: var(--fg-primary);
+}
+
+.m3-quick-note-send-btn {
+  min-height: 44px;
+  padding-left: 18px;
+  padding-right: 18px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
 .quick-note-list {
   list-style: none;
   margin: 14px 0 0;
@@ -4885,6 +5022,11 @@ details.widget-dropdown[open] .expand-icon {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.m3-quick-note-list {
+  margin-top: 16px;
+  gap: 10px;
 }
 
 .quick-note-item {
@@ -4902,6 +5044,31 @@ details.widget-dropdown[open] .expand-icon {
   background: var(--border-subtle);
 }
 
+.m3-quick-note-item {
+  gap: 14px;
+  padding: 10px 12px 10px 10px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.m3-quick-note-item:hover {
+  transform: translateY(-1px);
+  border-color: var(--border);
+}
+
+.m3-quick-note-item-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--primary-badge);
+  color: var(--primary);
+}
+
 .quick-note-item-dot {
   color: var(--fg-muted);
   flex-shrink: 0;
@@ -4912,6 +5079,29 @@ details.widget-dropdown[open] .expand-icon {
   font-size: 13.5px;
   color: var(--fg-primary);
   line-height: 1.5;
+}
+
+.m3-quick-note-item .quick-note-item-text {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.m3-quick-note-item-trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.m3-quick-note-item-count {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--fg-muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 3px 8px;
 }
 
 .quick-note-delete-btn {
@@ -4925,9 +5115,88 @@ details.widget-dropdown[open] .expand-icon {
   opacity: 1;
 }
 
+.m3-quick-note-delete-btn {
+  opacity: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--fg-muted);
+}
+
+.m3-quick-note-delete-btn:hover {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
 .quick-note-empty {
   margin-top: 14px;
   font-size: 13px;
+}
+
+.m3-quick-note-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 16px 0 0;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px dashed var(--border);
+  background: var(--bg-surface);
+}
+
+.m3-quick-note-empty-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: var(--primary-badge);
+  color: var(--primary);
+}
+
+.m3-quick-note-empty-icon .material-symbols-outlined {
+  font-size: 24px;
+}
+
+.m3-quick-note-empty-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg-heading);
+}
+
+.m3-quick-note-empty-sub {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+}
+
+@media (max-width: 640px) {
+  .m3-quick-note {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .m3-quick-note-title {
+    font-size: 24px;
+  }
+
+  .m3-quick-note-send-label {
+    display: none;
+  }
+
+  .m3-quick-note-send-btn {
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
+
+  .m3-quick-note-item-count {
+    display: none;
+  }
 }
 
 /* Quick Notes section inside AddEntryModal */
