@@ -1,6 +1,6 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useAppStore } from '../../store/appStore'
-import { formatTanggalIndo, todayStr } from '../../utils/format'
+import { formatTanggalIndo, todayStr, getRandomQuote } from '../../utils/format'
 import { QuickNoteWidget } from '../../components/QuickNoteWidget'
 
 export function DashboardPage() {
@@ -11,6 +11,7 @@ export function DashboardPage() {
   const setDashSubjectFilter = useAppStore((s) => s.setDashSubjectFilter)
   const scrollRef = useRef<HTMLDivElement>(null)
   const indicatorRef = useRef<HTMLDivElement>(null)
+  const [quote, setQuote] = useState(() => getRandomQuote())
 
   useEffect(() => {
     const el = scrollRef.current
@@ -75,7 +76,32 @@ export function DashboardPage() {
     <section id="tab-dashboard" className="tab-panel active" style={{ padding: 24 }}>
       <div className="dashboard-header">
         <h2 className="page-title">Beranda</h2>
-        <p className="hint">Ringkasan aktivitas PKL dan tugas-tugasmu.</p>
+        <p className="hint" style={{ marginBottom: 6 }}>Ringkasan aktivitas PKL dan tugas-tugasmu.</p>
+        <div
+          className="dashboard-quote-inline"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            maxWidth: 640,
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18, color: 'var(--accent-yellow, #F4B400)', flexShrink: 0 }}>
+            format_quote
+          </span>
+          <p key={quote.text} className="dashboard-quote-text" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55, color: 'var(--fg-secondary)', fontStyle: 'italic', flex: 1, minWidth: 0 }}>
+            “{quote.text}” <span style={{ fontStyle: 'normal', color: 'var(--fg-muted)', fontSize: 12 }}>— {quote.author}</span>
+          </p>
+          <button
+            type="button"
+            className="btn-icon btn-sm"
+            title="Tampilkan kutipan lain"
+            onClick={() => setQuote((prev) => getRandomQuote(prev.text))}
+            style={{ flexShrink: 0, width: 28, height: 28 }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>refresh</span>
+          </button>
+        </div>
       </div>
 
       <div style={{ containerType: 'inline-size', width: '100%' }}>

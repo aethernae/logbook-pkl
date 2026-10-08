@@ -513,6 +513,27 @@ input[type="file"]::file-selector-button:hover {
   color: var(--fg-heading);
 }
 
+.dashboard-quote-text {
+  animation: dashboardQuoteFadeIn 0.35s ease;
+}
+
+@keyframes dashboardQuoteFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-quote-inline {
+    max-width: 100%;
+  }
+}
+
 
 /* Side Panel (Kalender dll) */
 .side-panel {

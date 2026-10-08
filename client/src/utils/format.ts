@@ -68,7 +68,35 @@ export function getWeekKey(tanggal: string): string {
   return `${monObj.getFullYear()}-${String(monObj.getMonth() + 1).padStart(2, '0')}-${String(monObj.getDate()).padStart(2, '0')}`
 }
 
+export const DASHBOARD_QUOTES: { text: string; author: string }[] = [
+  { text: 'Setiap catatan kecil hari ini adalah bukti kerja kerasmu selama PKL.', author: 'LogBook' },
+  { text: 'Kedisiplinan mencatat hari ini memudahkan laporanmu esok hari.', author: 'LogBook' },
+  { text: 'Tugas kecil yang selesai hari ini lebih baik daripada rencana besar yang tertunda.', author: 'LogBook' },
+  { text: 'PKL bukan sekadar hadir, tapi tentang apa yang kamu pelajari setiap harinya.', author: 'LogBook' },
+  { text: 'Progres kecil yang konsisten mengalahkan semangat besar yang sesaat.', author: 'LogBook' },
+  { text: 'Jangan menunggu motivasi, mulailah mencatat maka motivasi akan datang.', author: 'LogBook' },
+  { text: 'Selesaikan satu tugas hari ini, dan hari esok akan terasa lebih ringan.', author: 'LogBook' },
+  { text: 'Catat, kerjakan, selesaikan — ulangi setiap hari selama PKL.', author: 'LogBook' },
+  { text: 'Pengalaman PKL terbaik datang dari rasa ingin tahu yang tidak pernah padam.', author: 'LogBook' },
+  { text: 'Fokus pada satu langkah kecil hari ini, bukan seluruh perjalanan PKL.', author: 'LogBook' },
+  { text: 'Orang rajin bukan yang tidak pernah lelah, tapi yang tetap mencatat meski lelah.', author: 'LogBook' },
+  { text: 'Jurnal yang rapi hari ini adalah nilai plus untuk laporan akhir PKL-mu.', author: 'LogBook' },
+]
+
+export function getRandomQuote(excludeText?: string): { text: string; author: string } {
+  if (DASHBOARD_QUOTES.length === 0) return { text: '', author: '' }
+  if (DASHBOARD_QUOTES.length === 1) return DASHBOARD_QUOTES[0]
+  let next = DASHBOARD_QUOTES[Math.floor(Math.random() * DASHBOARD_QUOTES.length)]
+  let guard = 0
+  while (next.text === excludeText && guard < 10) {
+    next = DASHBOARD_QUOTES[Math.floor(Math.random() * DASHBOARD_QUOTES.length)]
+    guard += 1
+  }
+  return next
+}
+
 export function todayStr(): string {
   const now = new Date()
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 }
+
