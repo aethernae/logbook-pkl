@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { ZipArchive } = require('archiver');
 const db = require('../db/sqlite');
-const { weekKey, weekRangeLabel } = require('../utils/dateHelper');
+const { monthKey, monthTitle, weekKey, weekRangeLabel } = require('../utils/dateHelper');
 const { generateDayDocx } = require('../generators/docxDay');
-const { generateWeekDocx } = require('../generators/docxWeek');
+const { generateMonthDocx } = require('../generators/docxMonth');
 const { generateDayPdf, generateCombinedPdf } = require('../generators/pdfDay');
-const { generateWeekPdf } = require('../generators/pdfWeek');
+const { generateMonthPdf, generateMonthCombinedPdf } = require('../generators/pdfMonth');
 
 // Parse kolom photos dengan aman — SATU baris korup tidak boleh menjatuhkan seluruh request
 function safeParsePhotos(raw) {
@@ -21,6 +21,14 @@ function safeParsePhotos(raw) {
 function getWeekEntries(wk) {
   const dbEntries = db.prepare('SELECT * FROM entries WHERE isDeleted = 0').all();
   return dbEntries.filter(e => weekKey(e.tanggal) === wk).map(e => {
+    e.photos = safeParsePhotos(e.photos);
+    return e;
+  });
+}
+
+function getMonthEntries(mk) {
+  const dbEntries = db.prepare('SELECT * FROM entries WHERE isDeleted = 0').all();
+  return dbEntries.filter(e => monthKey(e.tanggal) === mk).map(e => {
     e.photos = safeParsePhotos(e.photos);
     return e;
   });
@@ -65,7 +73,7 @@ router.get('/week/:weekKey/docx', async (req, res) => {
   const entries = getWeekEntries(wk);
   if (entries.length === 0) return res.status(404).json({ error: 'Tidak ada entri pada minggu ini' });
   try {
-    const buffer = await generateWeekDocx(getProfile(), wk, entries);
+    const buffer = await generateMonthDocx(getProfile(), wk, entries);
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
     res.setHeader('Content-Disposition', `attachment; filename="Jurnal-Minggu-${wk}.docx"`);
     res.send(buffer);
@@ -80,7 +88,7 @@ router.get('/week/:weekKey/pdf', async (req, res) => {
   const entries = getWeekEntries(wk);
   if (entries.length === 0) return res.status(404).json({ error: 'Tidak ada entri pada minggu ini' });
   try {
-    const buffer = await generateWeekPdf(getProfile(), wk, entries);
+    const buffer = await generateMonthPdf(getProfile(), wk, entries);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="Jurnal-Minggu-${wk}.pdf"`);
     res.send(buffer);
@@ -90,7 +98,38 @@ router.get('/week/:weekKey/pdf', async (req, res) => {
   }
 });
 
-// Download All Week PDFs as ZIP Archive
+// ─── Jurnal bulanan (pengganti mingguan — hemat kertas) ───
+router.get('/month/:monthKey/docx', async (req, res) => {
+  const mk = req.params.monthKey;
+  const entries = getMonthEntries(mk);
+  if (entries.length === 0) return res.status(404).json({ error: 'Tidak ada entri pada bulan ini' });
+  try {
+    const buffer = await generateMonthDocx(getProfile(), mk, entries);
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="Jurnal-Bulan-${mk}.docx"`);
+    res.send(buffer);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal membuat file Word' });
+  }
+});
+
+router.get('/month/:monthKey/pdf', async (req, res) => {
+  const mk = req.params.monthKey;
+  const entries = getMonthEntries(mk);
+  if (entries.length === 0) return res.status(404).json({ error: 'Tidak ada entri pada bulan ini' });
+  try {
+    const buffer = await generateMonthPdf(getProfile(), mk, entries);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="Jurnal-Bulan-${mk}.pdf"`);
+    res.send(buffer);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal membuat file PDF' });
+  }
+});
+
+// Download All Month PDFs as ZIP Archive
 router.get('/week/:weekKey/zip', async (req, res) => {
   const wk = req.params.weekKey;
   const profile = getProfile();
@@ -101,7 +140,7 @@ router.get('/week/:weekKey/zip', async (req, res) => {
     const sortedEntries = [...entries].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
 
     // Generate Weekly Summary PDF
-    const weekPdfBuffer = await generateWeekPdf(profile, wk, sortedEntries);
+    const weekPdfBuffer = await generateMonthPdf(profile, wk, sortedEntries);
 
     // Generate Daily PDFs concurrently
     const dayPdfs = await Promise.all(
@@ -136,6 +175,28 @@ router.get('/week/:weekKey/zip', async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Gagal membuat file ZIP laporan mingguan' });
+  }
+});
+
+// Unduh 1 file PDF multi-page: catatan harian dulu kronologis, jurnal bulanan di akhir.
+// Memudahkan tukang print — tidak perlu ekstrak ZIP berisi banyak file.
+router.get('/month/:monthKey/zip', async (req, res) => {
+  const mk = req.params.monthKey;
+  const profile = getProfile();
+  const entries = getMonthEntries(mk);
+  if (entries.length === 0) return res.status(404).json({ error: 'Tidak ada entri pada bulan ini' });
+
+  try {
+    const sortedEntries = [...entries].sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+    const buffer = await generateMonthCombinedPdf(profile, mk, sortedEntries);
+
+    const fileName = `Laporan-PKL-${monthTitle(mk).replace(/ /g, '-')}-${mk}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(buffer);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal membuat file PDF laporan bulanan' });
   }
 });
 
@@ -200,20 +261,19 @@ router.post('/batch/pdf', async (req, res) => {
     });
     archive.pipe(res);
 
-    // Group entries by weekKey so we can label the folders correctly
-    const entriesByWeek = {};
+    // Group entries by monthKey so we can label the folders correctly
+    const entriesByMonth = {};
     validPdfs.forEach(({ entry, buffer }) => {
-      const wk = weekKey(entry.tanggal);
-      if (!entriesByWeek[wk]) entriesByWeek[wk] = [];
-      entriesByWeek[wk].push({ entry, buffer });
+      const mk = monthKey(entry.tanggal);
+      if (!entriesByMonth[mk]) entriesByMonth[mk] = [];
+      entriesByMonth[mk].push({ entry, buffer });
     });
 
-    Object.keys(entriesByWeek).forEach(wk => {
-      // Create a beautiful folder name like 'Minggu 24 - 28 Agt 2026'
-      const weekEntries = entriesByWeek[wk].map(x => x.entry);
-      const folderName = `Minggu ${weekRangeLabel(wk, weekEntries)}`;
+    Object.keys(entriesByMonth).forEach(mk => {
+      // Folder seperti 'Agustus 2026'
+      const folderName = monthTitle(mk);
 
-      entriesByWeek[wk].forEach(({ entry, buffer }) => {
+      entriesByMonth[mk].forEach(({ entry, buffer }) => {
         archive.append(buffer, {
           name: `${folderName}/Catatan_Harian_${entry.tanggal}_${entry.hari || 'Hari'}.pdf`
         });

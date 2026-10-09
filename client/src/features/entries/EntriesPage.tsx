@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react'
 import { useAppStore } from '../../store/appStore'
-import { getWeekKey } from '../../utils/format'
+import { getMonthKey } from '../../utils/format'
 import * as api from '../../api/client'
-import { WeekGroup } from '../../components/entries/WeekGroup'
+import { MonthGroup } from '../../components/entries/MonthGroup'
 import type { Task, Entry } from '../../types/index'
 
 function SelectionToolbar() {
@@ -117,34 +117,24 @@ export function EntriesPage() {
   // 1. Daftar entri (tanpa filter — fitur pencarian tidak digunakan)
   const filteredEntries = currentEntries
 
-  // 2. Memoize pengelompokan minggu & pengurutan (Week Grouping)
-  const { weekMap, sortedWeekKeys } = useMemo(() => {
+  // 2. Memoize pengelompokan bulan & pengurutan (Month Grouping)
+  const { monthMap, sortedMonthKeys } = useMemo(() => {
     const map: Record<string, Entry[]> = {}
     filteredEntries.forEach(entry => {
-      const monKey = getWeekKey(entry.tanggal)
-      if (!map[monKey]) map[monKey] = []
-      map[monKey].push(entry)
+      const mKey = getMonthKey(entry.tanggal)
+      if (!map[mKey]) map[mKey] = []
+      map[mKey].push(entry)
     })
 
     const keys = Object.keys(map).sort((a, b) => b.localeCompare(a))
 
-    // Sortir entri di dalam minggu tersebut agar tidak dilakukan ulang saat Render
+    // Sortir entri di dalam bulan tersebut agar tidak dilakukan ulang saat Render
     keys.forEach(key => {
       map[key].sort((a, b) => b.tanggal.localeCompare(a.tanggal))
     })
 
-    return { weekMap: map, sortedWeekKeys: keys }
+    return { monthMap: map, sortedMonthKeys: keys }
   }, [filteredEntries])
-
-  // Hitung minggu paling awal dari seluruh entri (bukan yang difilter) untuk menentukan "Minggu ke-1"
-  const oldestWeekKey = useMemo(() => {
-    if (!entries || entries.length === 0) return null
-    let minDate = entries[0].tanggal
-    for (let i = 1; i < entries.length; i++) {
-      if (entries[i].tanggal < minDate) minDate = entries[i].tanggal
-    }
-    return getWeekKey(minDate)
-  }, [entries])
 
   // 3. Daftar item Tempat Sampah (tanpa filter — fitur pencarian tidak digunakan)
   const filteredTrashedTasks = trashedTasks || []
@@ -222,28 +212,19 @@ export function EntriesPage() {
             <p className="empty-state">Tempat sampah kosong.</p>
           )}
 
-          {sortedWeekKeys.map(wKey => {
-            const entriesInWeek = weekMap[wKey] // Telah di-sort dari useMemo
-            
-            let weekNumber = 1
-            if (oldestWeekKey) {
-              const d1 = new Date(wKey)
-              const d2 = new Date(oldestWeekKey)
-              const diffDays = Math.round((d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24))
-              weekNumber = Math.round(diffDays / 7) + 1
-            }
+          {sortedMonthKeys.map(mKey => {
+            const entriesInMonth = monthMap[mKey] // Telah di-sort dari useMemo
 
             return (
-              <WeekGroup
-                key={wKey}
-                wKey={wKey}
-                weekNumber={weekNumber}
-                entries={entriesInWeek}
+              <MonthGroup
+                key={mKey}
+                mKey={mKey}
+                entries={entriesInMonth}
                 isTrash={isTrash}
                 entriesViewMode={entriesViewMode}
                 selectedEntries={selectedEntries}
                 onToggleSelect={toggleSelectedEntry}
-                onSelectAllWeek={selectAllWeekEntries}
+                onSelectAllMonth={selectAllWeekEntries}
                 onEdit={handleEdit}
                 onDelete={handleDeleteEntry}
                 onRestore={handleRestoreEntry}

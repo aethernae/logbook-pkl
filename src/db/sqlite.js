@@ -69,6 +69,9 @@ db.exec(`
 try { db.exec("ALTER TABLE profile ADD COLUMN apiProvider TEXT DEFAULT 'gemini'"); } catch (e) {}
 try { db.exec("ALTER TABLE profile ADD COLUMN openRouterApiKey TEXT"); } catch (e) {}
 try { db.exec("ALTER TABLE profile ADD COLUMN ollamaUrl TEXT DEFAULT 'http://localhost:11434'"); } catch (e) {}
+// Migrasi NIP/NIDN untuk slot tanda tangan jurnal bulanan
+try { db.exec("ALTER TABLE profile ADD COLUMN nipPembimbing TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE profile ADD COLUMN nidnInstruktur TEXT DEFAULT ''"); } catch (e) {}
 
 // Insert default profile if not exists
 const profileExists = db.prepare('SELECT 1 FROM profile WHERE id = 1').get();

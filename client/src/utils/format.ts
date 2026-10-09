@@ -15,6 +15,8 @@ export function formatTanggalIndo(tanggal: string | null | undefined): string {
   return `${String(d).padStart(2, '0')} ${bulan[m - 1]} ${y}`
 }
 
+// LEGACY mingguan — tidak dipakai lagi sejak jurnal jadi bulanan.
+// Dipertahankan sementara agar tidak merusak import lama; aman dihapus total bila sudah yakin.
 export function weekRangeLabelClient(mondayKey: string, entries: { tanggal: string }[] = []): string {
   const bulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des']
   const [y, m, d] = mondayKey.split('-').map(Number)
@@ -59,6 +61,7 @@ export function weekRangeLabelClient(mondayKey: string, entries: { tanggal: stri
   return `${startDate.getDate()} ${bulanSingkat[startDate.getMonth()]} - ${endDate.getDate()} ${bulanSingkat[endDate.getMonth()]} ${endDate.getFullYear()}`
 }
 
+// LEGACY mingguan — tidak dipakai lagi sejak jurnal jadi bulanan.
 export function getWeekKey(tanggal: string): string {
   const [y, m, d] = tanggal.split('-').map(Number)
   const dateObj = new Date(y, m - 1, d)
@@ -66,6 +69,28 @@ export function getWeekKey(tanggal: string): string {
   const monObj = new Date(dateObj)
   monObj.setDate(dateObj.getDate() - dow)
   return `${monObj.getFullYear()}-${String(monObj.getMonth() + 1).padStart(2, '0')}-${String(monObj.getDate()).padStart(2, '0')}`
+}
+
+export function getMonthKey(tanggal: string): string {
+  if (!tanggal) return ''
+  // Samakan dengan backend: kunci = bulan tempat minggu (Senin–Minggu) BERAKHIR.
+  // Minggu yang nyebrang bulan ikut ketempel ke bulan berjalan, dua arah.
+  const [y, m, d] = String(tanggal).slice(0, 10).split('-').map(Number)
+  if (!y || !m || !d) return String(tanggal).slice(0, 7)
+  const dateObj = new Date(y, m - 1, d)
+  if (isNaN(dateObj.getTime())) return String(tanggal).slice(0, 7)
+  const dow = (dateObj.getDay() + 6) % 7 // 0=Senin ... 6=Minggu
+  const sunObj = new Date(dateObj)
+  sunObj.setDate(dateObj.getDate() + (6 - dow))
+  return `${sunObj.getFullYear()}-${String(sunObj.getMonth() + 1).padStart(2, '0')}`
+}
+
+const BULAN_PANJANG = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+
+export function monthTitleClient(monthKey: string): string {
+  const [y, m] = String(monthKey).split('-').map(Number)
+  if (!y || !m || m < 1 || m > 12) return String(monthKey)
+  return `${BULAN_PANJANG[m - 1]} ${y}`
 }
 
 export const DASHBOARD_QUOTES: { text: string; author: string }[] = [

@@ -15,6 +15,8 @@ router.put('/', (req, res) => {
   if (req.body.tempatPkl !== undefined) newProfile.tempatPkl = req.body.tempatPkl;
   if (req.body.namaInstruktur !== undefined) newProfile.namaInstruktur = req.body.namaInstruktur;
   if (req.body.namaPembimbing !== undefined) newProfile.namaPembimbing = req.body.namaPembimbing;
+  if (req.body.nipPembimbing !== undefined) newProfile.nipPembimbing = req.body.nipPembimbing;
+  if (req.body.nidnInstruktur !== undefined) newProfile.nidnInstruktur = req.body.nidnInstruktur;
   if (req.body.geminiApiKey !== undefined) newProfile.geminiApiKey = req.body.geminiApiKey;
   if (req.body.apiProvider !== undefined) newProfile.apiProvider = req.body.apiProvider;
   if (req.body.openRouterApiKey !== undefined) newProfile.openRouterApiKey = req.body.openRouterApiKey;
@@ -26,6 +28,8 @@ router.put('/', (req, res) => {
       tempatPkl = ?, 
       namaInstruktur = ?, 
       namaPembimbing = ?, 
+      nipPembimbing = ?,
+      nidnInstruktur = ?,
       geminiApiKey = ?,
       apiProvider = ?,
       openRouterApiKey = ?,
@@ -36,6 +40,8 @@ router.put('/', (req, res) => {
     newProfile.tempatPkl,
     newProfile.namaInstruktur,
     newProfile.namaPembimbing,
+    newProfile.nipPembimbing || '',
+    newProfile.nidnInstruktur || '',
     newProfile.geminiApiKey,
     newProfile.apiProvider,
     newProfile.openRouterApiKey,

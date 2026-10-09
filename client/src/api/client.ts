@@ -197,6 +197,8 @@ export async function updateProfile(data: Partial<{
     tempatPkl: string
     namaInstruktur: string
     namaPembimbing: string
+    nipPembimbing: string
+    nidnInstruktur: string
     geminiApiKey: string
     apiProvider: 'gemini' | 'openrouter' | 'ollama'
     openRouterApiKey: string

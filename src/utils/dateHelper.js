@@ -32,13 +32,79 @@ function hariTanggalIndo(dateStr) {
   return `${namaHari(dateStr)}, ${tanggalIndo(dateStr)}`;
 }
 
-// Returns a stable key identifying the Mon-Sun week a date falls in, e.g. "2026-W32"
+// Returns a stable key identifying the Mon-Sun week a date falls in, e.g. monday "2026-08-04"
+// (LEGACY mingguan — dipertahankan sampai UI/export bulanan selesai, lalu dihapus total)
 function weekKey(dateStr) {
   const d = dayjs(dateStr);
   // ISO week: Monday start
   const dow = (d.day() + 6) % 7; // 0=Mon ... 6=Sun
   const monday = d.subtract(dow, 'day');
   return monday.format('YYYY-MM-DD'); // key = Monday's date of that week
+}
+
+// Kunci grup jurnal bulanan: "YYYY-MM" dari bulan tempat minggu (Senin–Minggu)
+// BERAKHIR. Aturan tempel minggu nyebrang, dua arah:
+// - Senin 28 Sep – Min 04 Okt → minggu berakhir di Okt → kunci "2026-10"
+// - Sen 30 Sep (Rabu) ikut ketempel ke Oktober; jurnal September kehilangan 3 hari itu.
+// - Akhir Okt yang nyebrang ke Nov ikut ketempel ke November.
+// Minggu utuh dalam satu bulan tidak berubah (bulan mulai = bulan berakhir).
+function monthKey(dateStr) {
+  const d = dayjs(dateStr);
+  if (!d.isValid()) {
+    const raw = String(dateStr).slice(0, 7);
+    if (/^\d{4}-\d{2}$/.test(raw)) return raw;
+    return String(dateStr);
+  }
+  const dow = (d.day() + 6) % 7; // 0=Senin ... 6=Minggu
+  const sunday = d.add(6 - dow, 'day'); // akhir minggu tempat tanggal ini berada
+  return sunday.format('YYYY-MM');
+}
+
+// Label rentang dari entri yang ada, mis. "30 September - 08 Oktober 2026".
+// Dipakai untuk judul periode jurnal bulanan. Kalau kosong, fallback ke bulan kalender penuh.
+// Sengaja pakai tanggal penuh (bukan nomor saja) karena minggu tempel bisa nyebrang bulan.
+function monthRangeLabel(mKey, entries = []) {
+  const [y, m] = String(mKey).split('-').map(Number);
+  if (!y || !m || m < 1 || m > 12) return String(mKey);
+  const monthName = BULAN_ID[m - 1];
+  const daysInMonth = dayjs(`${y}-${String(m).padStart(2, '0')}-01`).daysInMonth() || 31;
+
+  let sorted = [];
+  if (entries && entries.length > 0) {
+    sorted = [...entries]
+      .map(e => e.tanggal)
+      .filter(Boolean)
+      .sort();
+  }
+  if (sorted.length === 0) {
+    return `01 - ${daysInMonth} ${monthName} ${y}`;
+  }
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  if (first === last) {
+    return tanggalIndo(first);
+  }
+  return `${tanggalIndo(first)} - ${tanggalIndo(last)}`;
+}
+
+// Nama bulan + tahun saja, mis. "Agustus 2026" — untuk judul grup UI & nama folder.
+function monthTitle(mKey) {
+  const [y, m] = String(mKey).split('-').map(Number);
+  if (!y || !m || m < 1 || m > 12) return String(mKey);
+  return `${BULAN_ID[m - 1]} ${y}`;
+}
+
+// "Negara, 31 Agustus 2026" — tanggal jurnal terakhir di bulan itu untuk slot tanda tangan.
+function monthSignDate(mKey, entries = []) {
+  let sorted = [];
+  if (entries && entries.length > 0) {
+    sorted = [...entries]
+      .map(e => e.tanggal)
+      .filter(Boolean)
+      .sort();
+  }
+  const lastDate = sorted.length > 0 ? sorted[sorted.length - 1] : `${mKey}-01`;
+  return `Negara, ${tanggalIndo(lastDate)}`;
 }
 
 function weekRangeLabel(mondayKey, entries = []) {
@@ -76,4 +142,4 @@ function weekRangeLabel(mondayKey, entries = []) {
 }
 
 
-module.exports = { namaHari, tanggalIndo, hariTanggalIndo, weekKey, weekRangeLabel, isValidDateStr, HARI_ID, BULAN_ID };
+module.exports = { namaHari, tanggalIndo, hariTanggalIndo, weekKey, weekRangeLabel, monthKey, monthRangeLabel, monthTitle, monthSignDate, isValidDateStr, HARI_ID, BULAN_ID };

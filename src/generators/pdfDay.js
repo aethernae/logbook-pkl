@@ -190,4 +190,4 @@ async function generateCombinedPdf(profile, entries) {
   });
 }
 
-module.exports = { generateDayPdf, generateCombinedPdf };
+module.exports = { generateDayPdf, generateCombinedPdf, renderEntryToDoc };

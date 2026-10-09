@@ -68,6 +68,8 @@ const ProfilePopover = ({ isOpen, ref }: { isOpen: boolean; ref?: React.Ref<HTML
     tempatPkl: profile?.tempatPkl || '',
     namaInstruktur: profile?.namaInstruktur || '',
     namaPembimbing: profile?.namaPembimbing || '',
+    nipPembimbing: profile?.nipPembimbing || '',
+    nidnInstruktur: profile?.nidnInstruktur || '',
   })
   const [saving, setSaving] = useState(false)
 
@@ -79,6 +81,8 @@ const ProfilePopover = ({ isOpen, ref }: { isOpen: boolean; ref?: React.Ref<HTML
         tempatPkl: profile.tempatPkl || '',
         namaInstruktur: profile.namaInstruktur || '',
         namaPembimbing: profile.namaPembimbing || '',
+        nipPembimbing: profile.nipPembimbing || '',
+        nidnInstruktur: profile.nidnInstruktur || '',
       })
     }
   }, [profile])
@@ -123,8 +127,16 @@ const ProfilePopover = ({ isOpen, ref }: { isOpen: boolean; ref?: React.Ref<HTML
           <input type="text" id="namaInstruktur" required value={form.namaInstruktur} onChange={(e) => setForm({ ...form, namaInstruktur: e.target.value })} />
         </div>
         <div className="form-row">
+          <label htmlFor="nidnInstruktur">NIDN Instruktur</label>
+          <input type="text" id="nidnInstruktur" placeholder="cth. 1234567890" value={form.nidnInstruktur} onChange={(e) => setForm({ ...form, nidnInstruktur: e.target.value })} />
+        </div>
+        <div className="form-row">
           <label htmlFor="namaPembimbing">Nama Pembimbing</label>
           <input type="text" id="namaPembimbing" required value={form.namaPembimbing} onChange={(e) => setForm({ ...form, namaPembimbing: e.target.value })} />
+        </div>
+        <div className="form-row">
+          <label htmlFor="nipPembimbing">NIP Pembimbing</label>
+          <input type="text" id="nipPembimbing" placeholder="cth. 19800101 200501 1 001" value={form.nipPembimbing} onChange={(e) => setForm({ ...form, nipPembimbing: e.target.value })} />
         </div>
         <div className="form-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button type="button" className="btn btn-outline" onClick={closeProfilePopover}>Batal</button>
